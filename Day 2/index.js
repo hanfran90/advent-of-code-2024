@@ -10,45 +10,61 @@ function readInputFile() {
 }
 
 function fileContent(data) {
-  const row = data.split("\n");
-  //   console.log(reports);
+  const reports = data
+    .trim()
+    .split("\n")
+    .map((level) => level.trim().split(" ").map(Number));
 
-  const reports = row.map((report) => {
-    return report.split(" ").map((item) => Number(item));
-  });
-  //   console.log(reports);
-  findSafeReports(reports);
+  const safeCount = findSafeReports(reports);
+  const dampenerSafeCount = countReportsProblemDampener(reports);
+
+  console.log("Safe reports:", safeCount);
+  console.log("Safe reports with Problem Dampener:", dampenerSafeCount);
+}
+
+function isReportSafe(report) {
+  if (report.length < 2) return false;
+  let isIncreasing = true;
+  let isDecreasing = true;
+
+  for (let i = 0; i < report.length; i++) {
+    const difference = report[i + 1] - report[i];
+
+    if (Math.abs(difference) < 1 || Math.abs(difference) > 3) {
+      return false;
+    }
+
+    if (difference > 0) isDecreasing = false;
+    if (difference < 0) isIncreasing = false;
+  }
+  return isIncreasing || isDecreasing;
 }
 
 function findSafeReports(reports) {
-  let safeCount = 0;
+  return reports.filter(isReportSafe).length;
+}
 
-  for (let i = 0; i < reports.length; i++) {
-    let reportI = reports[i];
-    let isSafe = true;
-    let isIncreasing = true;
-    let isDecreasing = true;
+function countReportsProblemDampener(reports) {
+  let dampenerSafeCount = 0;
 
-    for (let j = 0; j < reportI.length - 1; j++) {
-      let difference = reportI[j + 1] - reportI[j];
+  for (const report of reports) {
+    if (isReportSafe(report)) {
+      dampenerSafeCount++;
+      continue;
+    }
 
-      if (Math.abs(difference) < 1 || Math.abs(difference) > 3) {
-        isSafe = false;
+    for (let i = 0; i < report.length; i++) {
+      const modifyReport = report.slice(0, i).concat(report.slice(i + 1));
+      if (isReportSafe(modifyReport)) {
+        dampenerSafeCount++;
         break;
       }
-      if (difference > 0) isDecreasing = false;
-      if (difference < 0) isIncreasing = false;
-    }
-    if (isSafe && (isIncreasing || isDecreasing)) {
-      safeCount++;
     }
   }
-  console.log(safeCount);
+  console.log(dampenerSafeCount);
+  return dampenerSafeCount;
 }
 readInputFile();
-
-
-
 
 //part 1
 // one report per line
@@ -64,3 +80,8 @@ readInputFile();
 //if reach end of array then safecount +1
 //if not don't count
 //return count of safe reports
+
+//part 2
+//problem dampener
+//removing a single level in the report makes it safe... then it would class as safe
+//
