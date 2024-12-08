@@ -67,3 +67,6 @@ function sumOfValidMultiples(validMultiples) {
 }
 
 readInputFile();
+
+// Total of all mul: 173785482
+// Total of enabled mul: 83158140
